@@ -1,0 +1,6 @@
+[submodule "bookstoreApp"]
+	path = bookstoreApp
+	url = https://github.com/Yogi304/BookStoreAPI_FastAPIapplication.git
+[submodule "bookStoreApp"]
+	path = bookStoreApp
+	url = C:\\BookStoreAPIAutomation\\bookStoreApp

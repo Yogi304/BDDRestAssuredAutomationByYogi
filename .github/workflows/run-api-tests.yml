@@ -1,0 +1,49 @@
+# This workflow builds and runs the API test suite.
+# It checks out the main repository and the 'bookstore' API submodule,
+# sets up both Java and Python environments, installs dependencies,
+# and then executes the tests using Maven.
+
+name: API Testing CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the main repository and initialize submodules
+      - name: Checkout Repository and Submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true' # Crucial for pulling the bookstore API code
+
+      # 2. Set up Java Development Kit (JDK) 17 for the test framework
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # 3. Set up Python for the FastAPI server
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      # 4. Install Python dependencies required by the API server
+      # These are installed from the requirements.txt file inside the submodule.
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r bookstoreApp/requirements.txt
+      
+      # 5. Run the tests using Maven
+      # This command triggers the TestNG suite, which will start the server and run tests.
+      - name: Execute API Tests with Maven
+        run: mvn clean test
