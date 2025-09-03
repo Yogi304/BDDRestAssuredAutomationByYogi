@@ -8,6 +8,7 @@ import com.api.bookstore.requestBuilder.ApiClient;
 import com.api.bookstore.requestBuilder.RequestBuilder;
 import com.api.bookstore.requestpojos.BookManagement;
 import com.api.bookstore.responsepojos.Detail;
+import com.api.bookstore.responsepojos.GetAllBooks;
 import com.api.bookstore.responsepojos.GetBook;
 import com.api.bookstore.testcontext.TestContext;
 import com.api.bookstore.utils.DataGenerator;
@@ -65,12 +66,46 @@ public class BookManagementSteps {
          a_new_book_is_created(); // Reusing the given step for the main action
     }
     
+    @When("a GET request is sent to the book endpoint to retrieve book with valid bookId and with an {string} token")
+    public void a_get_request_is_sent_to_the_get_book_endpoint_with_the_book_s_id_invalid_or_expired_token(String authTokenType) {
+    	 String token;
+         switch(authTokenType) {
+             case "invalid":
+                 token = "thisIsAnInvalidToken";
+                 break;
+             case "expired":
+                  token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzaXZhQGdtYWlsIiwiZXhwIjoxNzU1NDk5ODIyfQ.R9Kuds3CU1smTccbs-PUwBfu7b-OFyYl6F7fGUKIquY"; // Example of an expired token
+                 break;
+             case "missing":
+            	 token="";
+             default:
+                 token = null;
+                 break;
+         }
+
+         WrappedReportLogger.trace("Sending GET /book/{bookId} request with " + authTokenType + " token.");
+         Map<String, Object> pathParams = new HashMap<>();
+         pathParams.put("bookId", TestContext.getNewBookId());
+         if (token != null) {
+             response = ApiClient.get(RequestBuilder.withAuthToken(token, null, pathParams), EndPoints.GET_BOOK);
+             TestContext.setResponse(response);
+         } else {
+        	 response = ApiClient.get(RequestBuilder.withAuthToken(token, null, pathParams), EndPoints.GET_BOOK);
+             TestContext.setResponse(response);
+         }
+    }
     @When("a GET request is sent to the get book endpoint with the book's ID")
     public void a_get_request_is_sent_to_the_get_book_endpoint_with_the_book_s_id() {
         WrappedReportLogger.trace("Retrieving book with ID: " + TestContext.getNewBookId());
         Map<String, Object> pathParams = new HashMap<>();
         pathParams.put("bookId", TestContext.getNewBookId());
         response = ApiClient.get(RequestBuilder.withAuthToken(TestContext.getAuthToken(), null, pathParams), EndPoints.GET_BOOK);
+        TestContext.setResponse(response);
+    }
+
+    @When("a GET request is sent to the get all books endpoint")
+    public void a_get_request_is_sent_to_the_get_all_books_endpoint_with_the_book_s_id() {
+        response = ApiClient.get(RequestBuilder.withAuthToken(TestContext.getAuthToken(), null, null), EndPoints.GET_ALL_BOOKS);
         TestContext.setResponse(response);
     }
 
@@ -152,6 +187,19 @@ public class BookManagementSteps {
         WrappedReportLogger.trace("Book found successfully.");
     }
     
+        @And("the response body should contain the List of all books")
+        public void the_response_body_should_contain_the_list_of_all_books() {
+            // Retrieve the response from the shared context and perform the validation.
+            List<GetBook> allBooks = Arrays.asList(response.as(GetBook[].class));
+            WrappedAssert.assertNotNull(allBooks, "The List is Empty");
+        }
+    
+    @And("the get all books retrival response should match the {string} schema")
+    public void the_get_all_books_retrival_response_should_match_the_schema(String schemaFileName) {
+    	WrappedReportLogger.trace("Validating Get All Books response against schema: " + schemaFileName);
+        ApiClient.validateResponseAgainstSchema(TestContext.getResponse(), EndPoints.GET_ALL_BOOKS,schemaFileName);
+    }
+    
     @And("the response body should contain the correct book details")
     public void the_response_body_should_contain_the_correct_book_details() {
         WrappedReportLogger.trace("Verifying book details in response...");
@@ -180,7 +228,7 @@ public class BookManagementSteps {
     @And("the create book response should match the {string} schema")
     public void the_create_book_response_should_match_the_schema(String schemaFileName) {
         WrappedReportLogger.trace("Validating create book response against schema: " + schemaFileName);
-        ApiClient.validateResponseAgainstSchema(TestContext.getResponse(), EndPoints.GET_ALL_BOOKS,schemaFileName);
+        ApiClient.validateResponseAgainstSchema(TestContext.getResponse(), EndPoints.CREATE_BOOK,schemaFileName);
     }
     
     @And("the book retrival response should match the {string} schema")

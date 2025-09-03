@@ -19,6 +19,13 @@ Feature: Book Management API
     Then the response status code should be 200
     And the response body should contain the correct book details
     And the book retrival response should match the "GetBook.json" schema
+    
+      @P3
+  Scenario: Successfully retrieve all books
+    When a GET request is sent to the get all books endpoint 
+    Then the response status code should be 200
+    And the response body should contain the List of all books
+    And the get all books retrival response should match the "GetAllBooks.json" schema
 
   @P3
   Scenario: Successfully update an existing book
@@ -47,6 +54,17 @@ Feature: Book Management API
       | invalid   | Invalid token or expired token | Incorrect token   |
       | expired   | Invalid token or expired token | Expired token     |
       | missing   | Not authenticated              | No token provided |
+   @P3
+  Scenario Outline: Attempting to access Get book by BookID endpoint with invalid authentication
+    When a GET request is sent to the book endpoint to retrieve book with valid bookId and with an "<auth_type>" token
+    Then the response status code should be 403
+    And the response body should contain the error detail "<error_message>"
+
+    Examples: 
+      | auth_type | error_message                  | description       |
+      | invalid   | Invalid token or expired token | Incorrect token   |
+      | expired   | Invalid token or expired token | Expired token     |
+      | missing   | Invalid token or expired token | No token provided |
 
   @P3
   Scenario: Attempting to retrieve a book with a non-existent ID

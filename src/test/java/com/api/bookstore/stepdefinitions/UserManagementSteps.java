@@ -79,8 +79,8 @@ public class UserManagementSteps {
 	    public void the_response_body_should_contain_the_error_detail(String errorDetail) {
 	        WrappedReportLogger.trace("Asserting the error detail in the response body...");
 	        Detail detailResponse = TestContext.getResponse().as(Detail.class);
-	        WrappedAssert.assertEquals(detailResponse.getDetail(), errorDetail, "Validating detail value for existing user");
-	        WrappedReportLogger.trace("Verified that an existing user cannot be created again.");
+	        WrappedAssert.assertEquals(detailResponse.getDetail(), errorDetail, "Validating detail value");
+	        WrappedReportLogger.trace("Verified The Error Details."+errorDetail);
 	    }
 
 
