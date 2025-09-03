@@ -18,7 +18,7 @@ RestAssured BDD Framework for testing Bookstore API
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Yogi304/RestAssuredBDDAutomation.git
+   git clone https://github.com/Yogi304/BDDRestAssuredAutomationByYogi.git
    cd yogiRestAssuredAutomation
 2. set env as QA in config file using, env=QA
 3. Run the Scenarios
