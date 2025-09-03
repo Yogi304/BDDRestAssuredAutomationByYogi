@@ -1,0 +1,20 @@
+
+<suite name="BookStore API Test Suite">
+
+	<listeners>
+		<listener class-name="com.api.bookstore.report.ExtentReporter" />
+	</listeners>
+	
+	
+	<test name="P0 - Smoke Tests">
+        <classes>
+            <class name="com.api.bookstore.runner.TestRunner">
+                <methods>
+                    <parameter name="cucumber.filter.tags" value="@P0"/>
+                </methods>
+            </class>
+        </classes>
+    </test>	
+    
+	
+</suite>

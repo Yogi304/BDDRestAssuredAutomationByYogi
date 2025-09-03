@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "detail": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "json_invalid"
+          },
+          "loc": {
+            "type": "array",
+            "items": [
+              { "type": "string", "example": "body" },
+              { "type": "integer", "example": 73 }
+            ],
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "msg": {
+            "type": "string",
+            "example": "JSON decode error"
+          },
+          "input": {
+            "type": "object"
+          },
+          "ctx": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "example": "Illegal trailing comma before end of object"
+              }
+            },
+            "required": ["error"]
+          }
+        },
+        "required": ["type", "loc", "msg", "input", "ctx"]
+      }
+    }
+  },
+  "required": ["detail"]
+}

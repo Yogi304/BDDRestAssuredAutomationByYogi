@@ -1,0 +1,21 @@
+
+<suite name="BookStore API Test Suite">
+
+	<listeners>
+		<listener class-name="com.api.bookstore.report.ExtentReporter" />
+	</listeners>
+	
+	
+	<test name="BooksAPI TestSuite">
+        <classes>
+            <class name="com.api.bookstore.runner.TestRunner">
+                <methods>
+                   <parameter name="cucumber.features" value="src/test/resources/features/"/>
+                    
+                </methods>
+            </class>
+        </classes>
+    </test>	
+    
+	
+</suite>
