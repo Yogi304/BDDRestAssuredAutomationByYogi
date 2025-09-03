@@ -1,7 +1,7 @@
 package com.api.bookstore.logs;
 
 public final class ConsoleColors {
-	// awesome code I copied!
+	
 	
     // Reset
     public static final String RESET = "\033[0m";  // Text Reset

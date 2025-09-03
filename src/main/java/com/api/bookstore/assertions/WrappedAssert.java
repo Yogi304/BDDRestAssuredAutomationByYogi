@@ -86,8 +86,7 @@ public class WrappedAssert {
 	        }
 	        
 	        boolean matchesSchema;
-	        
-	     // Check if schema file exists in classpath
+	     
 	        if (ApiClient.class.getClassLoader().getResource(schemaPath) == null) {
 	            WrappedReportLogger.error("[VERIFICATION - FAIL] " + message + ". SCHEMA FILE NOT FOUND [" + schemaPath + "]");
 		        ExtentReporter.getInstance().getExtentTest()

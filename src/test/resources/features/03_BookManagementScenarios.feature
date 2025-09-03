@@ -5,8 +5,6 @@
 @BookManagement
 Feature: Book Management API
 
-
-
   @P3
   Scenario: Successfully create a new book
     When a POST request is sent to the create book endpoint with valid details
@@ -21,7 +19,6 @@ Feature: Book Management API
     Then the response status code should be 200
     And the response body should contain the correct book details
     And the book retrival response should match the "GetBook.json" schema
-    
 
   @P3
   Scenario: Successfully update an existing book
@@ -38,14 +35,14 @@ Feature: Book Management API
     Then the response status code should be 200
     And the response body should contain the success message "Book deleted successfully"
     And the book should no longer be found
-   
 
   @P3
   Scenario Outline: Attempting to access book endpoints with invalid authentication
     When a GET request is sent to the get all books endpoint with an "<auth_type>" token
     Then the response status code should be 403
     And the response body should contain the error detail "<error_message>"
-		Examples: 
+
+    Examples: 
       | auth_type | error_message                  | description       |
       | invalid   | Invalid token or expired token | Incorrect token   |
       | expired   | Invalid token or expired token | Expired token     |
@@ -66,5 +63,3 @@ Feature: Book Management API
     Then the response status code should be 404
     And the response body should contain the error detail "Book not found"
     And the non existing book deletion response should match the "Detail.json" schema
-
- 

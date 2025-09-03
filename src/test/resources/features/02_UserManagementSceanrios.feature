@@ -18,7 +18,7 @@ Feature: UserManagement Feature
   @P1
   Scenario: Attempting to register with an existing email (Negative Scenario)
     Given a set of new user details are generated
-    Given the user is already registered in the system
+    And the user is already registered in the system
     When another POST request is sent to the signup endpoint with the same user details
     Then the response status code should be 400
     And the response body should contain the error detail "Email already registered"

@@ -7,10 +7,8 @@ import com.api.bookstore.logs.WrappedReportLogger;
 import com.api.bookstore.requestBuilder.ApiClient;
 import com.api.bookstore.requestBuilder.RequestBuilder;
 import com.api.bookstore.requestpojos.BookManagement;
-import com.api.bookstore.requestpojos.UserManagement;
 import com.api.bookstore.responsepojos.Detail;
 import com.api.bookstore.responsepojos.GetBook;
-import com.api.bookstore.responsepojos.LoginForAccessTokenResponse;
 import com.api.bookstore.testcontext.TestContext;
 import com.api.bookstore.utils.DataGenerator;
 
@@ -18,7 +16,6 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import io.cucumber.java.en.And;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,53 +29,32 @@ public class BookManagementSteps {
     public static int newBookId;
 	public static int newPublishedYear;
 	
-	 private final TestContext testContext;
-	 
-	public BookManagementSteps(TestContext testContext)
-	{
-		this.testContext=testContext;
-	}
-	   @And("the user successfully logs in to get an auth token")
-	    public void the_user_successfully_logs_in_to_get_an_auth_token() {
-	        WrappedReportLogger.trace("Logging in to get auth token...");
-	        UserManagement loginRequest = new UserManagement();
-	        // Assuming user details are already in context from a Background step
-	        loginRequest.setId(testContext.userSignupRequest.getId());
-	        loginRequest.setEmail(testContext.userSignupRequest.getEmail());
-	        loginRequest.setPassword(testContext.userSignupRequest.getPassword());
-
-	        Response loginResponse = ApiClient.post(RequestBuilder.withBodyAndNoAuthToken(loginRequest, null, null), EndPoints.LOGIN);
-	        WrappedAssert.assertEquals(loginResponse.getStatusCode(), 200, "Precondition: Login failed.");
-
-	        LoginForAccessTokenResponse tokenResponse = loginResponse.as(LoginForAccessTokenResponse.class);
-	        testContext.authToken = tokenResponse.getAccess_token();
-	        WrappedAssert.assertNotNull(testContext.authToken, "Auth token was null after login.");
-	        WrappedReportLogger.trace("Login successful, token stored in context.");
-	    }
+	public static Response response;
 	
 	@Given("a new book is created")
     public void a_new_book_is_created() {
         WrappedReportLogger.trace("Creating a new book as a precondition...");
         BookManagement createBook = new BookManagement();
-        testContext.newBookId = DataGenerator.randomID();
-        createBook.setId(testContext.newBookId);
-        createBook.setName("A Game of Thrones " + testContext.newBookId);
+        TestContext.setNewBookId(DataGenerator.randomID());
+        createBook.setId(TestContext.getNewBookId());
+        createBook.setName("A Game of Thrones " + TestContext.getNewBookId());
         createBook.setAuthor("George R.R. Martin");
         createBook.setBook_summary("A tale of kings and dragons.");
         createBook.setPublished_year(1996);
 
-        testContext.response = ApiClient.post(RequestBuilder.withBodyAndAuthToken(createBook, testContext.authToken, null, null), EndPoints.CREATE_BOOK);
-        WrappedAssert.assertEquals(testContext.response.getStatusCode(), 200, "Precondition: Book creation SuccessFul.");
-        WrappedReportLogger.trace("Book with ID " + testContext.newBookId + " created successfully.");
+        response = ApiClient.post(RequestBuilder.withBodyAndAuthToken(createBook, TestContext.getAuthToken(), null, null), EndPoints.CREATE_BOOK);
+        TestContext.setResponse(response);
+        WrappedAssert.assertEquals(TestContext.getResponse().getStatusCode(), 200, "Precondition: Book creation SuccessFul.");
+        WrappedReportLogger.trace("Book with ID " + TestContext.getNewBookId() + " created successfully.");
     }
     
     @Given("the book is successfully deleted")
     public void the_book_is_successfully_deleted() {
         WrappedReportLogger.trace("Deleting the book as a precondition...");
         Map<String, Object> pathParams = new HashMap<>();
-        pathParams.put("bookId", testContext.newBookId);
-        ApiClient.delete(RequestBuilder.withAuthToken(testContext.authToken, null, pathParams), EndPoints.DELETE_BOOK);
-        WrappedReportLogger.trace("Book with ID " + testContext.newBookId + " deleted.");
+        pathParams.put("bookId", TestContext.getNewBookId());
+        ApiClient.delete(RequestBuilder.withAuthToken(TestContext.getAuthToken(), null, pathParams), EndPoints.DELETE_BOOK);
+        WrappedReportLogger.trace("Book with ID " + TestContext.getNewBookId() + " deleted.");
     }
 
 
@@ -91,33 +67,36 @@ public class BookManagementSteps {
     
     @When("a GET request is sent to the get book endpoint with the book's ID")
     public void a_get_request_is_sent_to_the_get_book_endpoint_with_the_book_s_id() {
-        WrappedReportLogger.trace("Retrieving book with ID: " + testContext.newBookId);
+        WrappedReportLogger.trace("Retrieving book with ID: " + TestContext.getNewBookId());
         Map<String, Object> pathParams = new HashMap<>();
-        pathParams.put("bookId", testContext.newBookId);
-        testContext.response = ApiClient.get(RequestBuilder.withAuthToken(testContext.authToken, null, pathParams), EndPoints.GET_BOOK);
+        pathParams.put("bookId", TestContext.getNewBookId());
+        response = ApiClient.get(RequestBuilder.withAuthToken(TestContext.getAuthToken(), null, pathParams), EndPoints.GET_BOOK);
+        TestContext.setResponse(response);
     }
 
     @When("a PUT request is sent to the update book endpoint with new details")
     public void a_put_request_is_sent_to_the_update_book_endpoint_with_new_details() {
-        WrappedReportLogger.trace("Updating book with ID: " + testContext.newBookId);
+        WrappedReportLogger.trace("Updating book with ID: " + TestContext.getNewBookId());
         BookManagement updateBook = new BookManagement();
-        updateBook.setId(testContext.newBookId);
+        updateBook.setId(TestContext.getNewBookId());
         updateBook.setName("A Clash of Kings");
         updateBook.setAuthor("Updated Author");
         updateBook.setBook_summary("Updated summary.");
         updateBook.setPublished_year(1998);
 
         Map<String, Object> pathParams = new HashMap<>();
-        pathParams.put("bookId", testContext.newBookId);
-        testContext.response = ApiClient.put(RequestBuilder.withBodyAndAuthToken(updateBook, testContext.authToken, null, pathParams), EndPoints.UPDATE_BOOK);
+        pathParams.put("bookId", TestContext.getNewBookId());
+        response = ApiClient.put(RequestBuilder.withBodyAndAuthToken(updateBook, TestContext.getAuthToken(), null, pathParams), EndPoints.UPDATE_BOOK);
+        TestContext.setResponse(response);
     }
     
     @When("a DELETE request is sent to the delete book endpoint with the book's ID")
     public void a_delete_request_is_sent_to_the_delete_book_endpoint_with_the_book_s_id() {
-        WrappedReportLogger.trace("Deleting book with ID: " + testContext.newBookId);
+        WrappedReportLogger.trace("Deleting book with ID: " + TestContext.getNewBookId());
         Map<String, Object> pathParams = new HashMap<>();
-        pathParams.put("bookId", testContext.newBookId);
-        testContext.response = ApiClient.delete(RequestBuilder.withAuthToken(testContext.authToken, null, pathParams), EndPoints.DELETE_BOOK);
+        pathParams.put("bookId", TestContext.getNewBookId());
+        response = ApiClient.delete(RequestBuilder.withAuthToken(TestContext.getAuthToken(), null, pathParams), EndPoints.DELETE_BOOK);
+        TestContext.setResponse(response);
     }
 
     @When("another DELETE request is sent to the delete book endpoint with the same book's ID")
@@ -143,9 +122,11 @@ public class BookManagementSteps {
 
         WrappedReportLogger.trace("Sending GET /books request with " + auth_type + " token.");
         if (token != null) {
-            testContext.response = ApiClient.get(RequestBuilder.withAuthToken(token, null, null), EndPoints.GET_ALL_BOOKS);
+            response = ApiClient.get(RequestBuilder.withAuthToken(token, null, null), EndPoints.GET_ALL_BOOKS);
+            TestContext.setResponse(response);
         } else {
-             testContext.response = ApiClient.get(RequestBuilder.defaultSpec(), EndPoints.GET_ALL_BOOKS);
+             response = ApiClient.get(RequestBuilder.defaultSpec(), EndPoints.GET_ALL_BOOKS);
+             TestContext.setResponse(response);
         }
     }
     
@@ -154,7 +135,8 @@ public class BookManagementSteps {
         WrappedReportLogger.trace("Retrieving book with non-existent ID: " + bookId);
         Map<String, Object> pathParams = new HashMap<>();
         pathParams.put("bookId", bookId);
-        testContext.response = ApiClient.get(RequestBuilder.withAuthToken(testContext.authToken, null, pathParams), EndPoints.GET_BOOK);
+        response = ApiClient.get(RequestBuilder.withAuthToken(TestContext.getAuthToken(), null, pathParams), EndPoints.GET_BOOK);
+        TestContext.setResponse(response);
     }
 
     // ============== THEN STEPS ==============
@@ -162,10 +144,10 @@ public class BookManagementSteps {
     @And("the new book should be present in the list of all books")
     public void the_new_book_should_be_present_in_the_list_of_all_books() {
         WrappedReportLogger.trace("Verifying new book is in the GET /books list...");
-        Response response = ApiClient.get(RequestBuilder.withAuthToken(testContext.authToken, null, null), EndPoints.GET_ALL_BOOKS);
+        Response response = ApiClient.get(RequestBuilder.withAuthToken(TestContext.getAuthToken(), null, null), EndPoints.GET_ALL_BOOKS);
         List<GetBook> allBooks = Arrays.asList(response.as(GetBook[].class));
         
-        boolean found = allBooks.stream().anyMatch(book -> book.getId() == testContext.newBookId);
+        boolean found = allBooks.stream().anyMatch(book -> book.getId() == TestContext.getNewBookId());
         WrappedAssert.assertTrue(found, "Newly created book was not found in the list of all books.");
         WrappedReportLogger.trace("Book found successfully.");
     }
@@ -173,14 +155,14 @@ public class BookManagementSteps {
     @And("the response body should contain the correct book details")
     public void the_response_body_should_contain_the_correct_book_details() {
         WrappedReportLogger.trace("Verifying book details in response...");
-        GetBook getBook = testContext.response.as(GetBook.class);
-        WrappedAssert.assertEquals(getBook.getId(), testContext.newBookId, "Validating book ID in response.");
+        GetBook getBook = TestContext.getResponse().as(GetBook.class);
+        WrappedAssert.assertEquals(getBook.getId(), TestContext.getNewBookId(), "Validating book ID in response.");
     }
     
     @And("the book details should be updated when retrieved again")
     public void the_book_s_details_should_be_updated_when_retrieved_again() {
          a_get_request_is_sent_to_the_get_book_endpoint_with_the_book_s_id(); // Make the GET call again
-         GetBook getBook = testContext.response.as(GetBook.class);
+         GetBook getBook = TestContext.getResponse().as(GetBook.class);
          WrappedAssert.assertEquals(getBook.getAuthor(), "Updated Author", "Validating updated author name.");
          WrappedAssert.assertEquals(getBook.getName(), "A Clash of Kings", "Validating updated book name.");
          WrappedReportLogger.trace("Verified book details were updated successfully.");
@@ -189,8 +171,8 @@ public class BookManagementSteps {
     @And("the book should no longer be found")
     public void the_book_should_no_longer_be_found() {
         a_get_request_is_sent_to_the_get_book_endpoint_with_the_book_s_id(); // Try to get the deleted book
-        WrappedAssert.assertEquals(testContext.response.getStatusCode(), 404, "Verifying deleted book returns 404.");
-        Detail detail = testContext.response.as(Detail.class);
+        WrappedAssert.assertEquals(TestContext.getResponse().getStatusCode(), 404, "Verifying deleted book returns 404.");
+        Detail detail = TestContext.getResponse().as(Detail.class);
         WrappedAssert.assertEquals(detail.getDetail(), "Book not found", "Verifying 'Book not found' message for deleted book.");
         WrappedReportLogger.trace("Verified book is no longer accessible.");
     }
@@ -198,37 +180,37 @@ public class BookManagementSteps {
     @And("the create book response should match the {string} schema")
     public void the_create_book_response_should_match_the_schema(String schemaFileName) {
         WrappedReportLogger.trace("Validating create book response against schema: " + schemaFileName);
-        ApiClient.validateResponseAgainstSchema(testContext.response, EndPoints.GET_ALL_BOOKS,schemaFileName);
+        ApiClient.validateResponseAgainstSchema(TestContext.getResponse(), EndPoints.GET_ALL_BOOKS,schemaFileName);
     }
     
     @And("the book retrival response should match the {string} schema")
     public void the_book_retrival_response_should_match_the_schema(String schemaFileName) {
         WrappedReportLogger.trace("Validating book retrival response against schema: " + schemaFileName);
-        ApiClient.validateResponseAgainstSchema(testContext.response, EndPoints.GET_BOOK,schemaFileName);
+        ApiClient.validateResponseAgainstSchema(TestContext.getResponse(), EndPoints.GET_BOOK,schemaFileName);
     }
     
     @And("the book updation response should match the {string} schema")
     public void the_book_updation_response_should_match_the_schema(String schemaFileName) {
         WrappedReportLogger.trace("Validating hbook updation response against schema: " + schemaFileName);
-        ApiClient.validateResponseAgainstSchema(testContext.response, EndPoints.UPDATE_BOOK,schemaFileName);
+        ApiClient.validateResponseAgainstSchema(TestContext.getResponse(), EndPoints.UPDATE_BOOK,schemaFileName);
     }
     
     
     @And("the book deletion response should match the {string} schema")
     public void the_bookDeletion_response_should_match_the_schema(String schemaFileName) {
         WrappedReportLogger.trace("Validating  book deletion response against schema: " + schemaFileName);
-        ApiClient.validateResponseAgainstSchema(testContext.response, EndPoints.DELETE_BOOK,schemaFileName);
+        ApiClient.validateResponseAgainstSchema(TestContext.getResponse(), EndPoints.DELETE_BOOK,schemaFileName);
     }
     
     @And("the book wih non existing Id retrieval response should match the {string} schema")
     public void the_book_withNonExistingID_response_should_match_the_schema(String schemaFileName) {
         WrappedReportLogger.trace("Validating the book wih non existing Id retrieval response against schema: " + schemaFileName);
-        ApiClient.validateResponseAgainstSchema(testContext.response, EndPoints.GET_BOOK,schemaFileName);
+        ApiClient.validateResponseAgainstSchema(TestContext.getResponse(), EndPoints.GET_BOOK,schemaFileName);
     }
     @And("the non existing book deletion response should match the {string} schema")
     public void the_non_existingBook_bookDeletion_response_should_match_the_schema(String schemaFileName) {
         WrappedReportLogger.trace("Validating  book deletion response against schema: " + schemaFileName);
-        ApiClient.validateResponseAgainstSchema(testContext.response, EndPoints.DELETE_BOOK,schemaFileName);
+        ApiClient.validateResponseAgainstSchema(TestContext.getResponse(), EndPoints.DELETE_BOOK,schemaFileName);
     }
     
    

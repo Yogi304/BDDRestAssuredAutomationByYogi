@@ -53,14 +53,13 @@ public class TestRunner extends AbstractTestNGCucumberTests{
 	    public static void stopServer() {
 	        if (fastApiProcess != null) {
 	            System.out.println("Stopping FastAPI server...");
-	            fastApiProcess.destroy(); // Sends SIGTERM
+	            fastApiProcess.destroy(); 
 	            try {
-	                // Wait for the process to terminate gracefully
 	                if (!fastApiProcess.waitFor(5, TimeUnit.SECONDS)) {
 	                    System.out.println("Server did not stop gracefully, forcing shutdown...");
-	                    fastApiProcess.destroyForcibly(); // Sends SIGKILL
+	                    fastApiProcess.destroyForcibly(); 
 	                }
-	                System.out.println("✅ Server stopped.");
+	                System.out.println("Server stopped.");
 	            } catch (InterruptedException e) {
 	                e.printStackTrace();
 	                fastApiProcess.destroyForcibly();

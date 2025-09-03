@@ -8,7 +8,6 @@ import com.api.bookstore.responsepojos.LoginForAccessTokenResponse;
 import com.api.bookstore.testcontext.TestContext;
 import com.api.bookstore.utils.DataGenerator;
 
-import io.cucumber.java.AfterAll;
 import io.cucumber.java.BeforeAll;
 import io.restassured.response.Response;
 
@@ -37,9 +36,7 @@ public class ApplicationHooks {
 		        Response loginResponse = ApiClient.post(RequestBuilder.withBodyAndNoAuthToken(TestContext.getUsersLoginRequest(), null, null), EndPoints.LOGIN);
 
 		        LoginForAccessTokenResponse tokenResponse = loginResponse.as(LoginForAccessTokenResponse.class);
-		        TestContext.setAuthToken(tokenResponse.getAccess_token()); 
-	        
-	        
+		        TestContext.setAuthToken(tokenResponse.getAccess_token());     
 	
 	}
 	

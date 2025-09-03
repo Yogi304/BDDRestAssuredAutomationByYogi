@@ -73,7 +73,7 @@ public class ApiClient {
     }
 
 
-	public static void validateResponseAgainstSchema(Response response,String endpoint, String schemaFileName) {
+    public static void validateResponseAgainstSchema(Response response,String endpoint, String schemaFileName) {
 		   WrappedAssert.assertJsonSchema(response, "schemas/"+schemaFileName,
 		            "Validating JSON schema for  " + endpoint);
 		
